@@ -1,0 +1,39 @@
+/* Основний стиль навігації */
+.navbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #1a1a1a;
+  padding: 20px;
+  border-bottom: 2px solid #444;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+/* Стиль для посилань */
+.navLink {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+  margin: 0 15px;
+  padding: 10px 15px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.navLink:hover {
+  background-color: #007BFF;
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.5);
+}
+
+.navLink:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.navbar:hover {
+  background-color: #222;
+}
