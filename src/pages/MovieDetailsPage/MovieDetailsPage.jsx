@@ -1,5 +1,5 @@
-import { useParams, Outlet, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, Outlet, Link, useLocation } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { FaUsers, FaStar, FaPlay } from "react-icons/fa";
 import styles from "./MovieDetailsPage.module.css";
@@ -9,28 +9,36 @@ const API_KEY = "fa1c4d36238c3395415f197ac94e9567";
 
 function MovieDetailsPage() {
   const { movieId } = useParams();
+  const location = useLocation();
+  const backLinkRef = useRef(location.state?.from ?? "/movies");
+
   const [movie, setMovie] = useState(null);
   const [trailerKey, setTrailerKey] = useState(null);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const response = await axios.get(
+        const { data } = await axios.get(
           `https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`
         );
-        setMovie(response.data);
+        setMovie(data);
       } catch (error) {
         console.error("Помилка завантаження деталей фільму:", error);
+        setError("Не вдалося завантажити деталі фільму.");
+      } finally {
+        setLoading(false);
       }
     };
 
     const fetchTrailer = async () => {
       try {
-        const response = await axios.get(
+        const { data } = await axios.get(
           `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${API_KEY}`
         );
-        const trailers = response.data.results.filter(
+        const trailers = data.results.filter(
           (video) => video.type === "Trailer"
         );
         if (trailers.length > 0) {
@@ -45,10 +53,16 @@ function MovieDetailsPage() {
     fetchTrailer();
   }, [movieId]);
 
-  if (!movie) return <div className={styles.spinner}></div>;
+  if (loading) return <div className={styles.spinner}></div>;
+  if (error) return <p className={styles.error}>{error}</p>;
+  if (!movie) return <p>Фільм не знайдено</p>;
 
   return (
     <div className={styles.detailsContainer}>
+      <Link to={backLinkRef.current} className={styles.goBack}>
+        ← Go back
+      </Link>
+
       <h2>{movie.title}</h2>
       <img
         src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
@@ -62,14 +76,16 @@ function MovieDetailsPage() {
         <strong>Дата випуску:</strong> {movie.release_date}
       </p>
       <p>
-        <strong>Рейтинг:</strong> {movie.vote_average}
+        <strong>Рейтинг:</strong> {movie.vote_average.toFixed(1)}
       </p>
       <p>
         <strong>Бюджет:</strong>{" "}
-        {movie.budget ? movie.budget : "Інформація відсутня"}
+        {movie.budget
+          ? `$${movie.budget.toLocaleString()}`
+          : "Інформація відсутня"}
       </p>
       <p>
-        <strong>Популярність:</strong> {movie.popularity}
+        <strong>Популярність:</strong> {movie.popularity.toFixed(1)}
       </p>
 
       <div className={styles.links}>
